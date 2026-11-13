@@ -1,0 +1,873 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Tissue Battle</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@500;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: two team wheels side by side under a scoreboard header, the question stage below, a winner overlay on top.
+   Palette: soft lilac ground, lilac for Team Olivia Rodrigo, mint for Team Billie Eilish, butter + lavender for the stage. */
+:root{
+  --bg:#EDE5FB; --bg2:#E4F4EE; --surface:#F8F2FF; --ink:#2F2B43; --muted:#6C6488; --line:#DCCFF2; --pink:#F9DDE7; --sky:#DCEBFB;
+  --alma:#D6C6F4; --alma-soft:#EEE7FC; --alma-deep:#6A4FB6;
+  --leen:#B8E3D3; --leen-soft:#E0F4EC; --leen-deep:#2A7D61;
+  --lav:#CDBFF3; --lav-deep:#5E48BF; --butter:#F7E8A6;
+  --good:#3E9B6E; --good-soft:#D6F1E2; --bad:#C2556A; --bad-soft:#F8DCE2;
+  --shadow:0 10px 30px -14px rgba(70,55,130,.35);
+  --display:"Grandstander","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#2B2642; --bg2:#352F51; --surface:#3B3459; --ink:#F4EFFF; --muted:#C2B9E0; --line:#4E4672; --pink:#5A3E5E; --sky:#33456A;
+  --alma:#C7B5F4; --alma-soft:#4A3F70; --alma-deep:#DCD0FA;
+  --leen:#A6DFC8; --leen-soft:#2F5048; --leen-deep:#BDEBD9;
+  --lav:#9F8EE0; --lav-deep:#C6B9F6; --butter:#E6D58C;
+  --good:#7FD1A6; --good-soft:#1F3A2D; --bad:#F09AAB; --bad-soft:#41252D;
+  --shadow:0 12px 30px -14px rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#2B2642; --bg2:#352F51; --surface:#3B3459; --ink:#F4EFFF; --muted:#C2B9E0; --line:#4E4672; --pink:#5A3E5E; --sky:#33456A;
+  --alma:#C7B5F4; --alma-soft:#4A3F70; --alma-deep:#DCD0FA;
+  --leen:#A6DFC8; --leen-soft:#2F5048; --leen-deep:#BDEBD9;
+  --lav:#9F8EE0; --lav-deep:#C6B9F6; --butter:#E6D58C;
+  --good:#7FD1A6; --good-soft:#1F3A2D; --bad:#F09AAB; --bad-soft:#41252D;
+  --shadow:0 12px 30px -14px rgba(0,0,0,.6); color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  background-image:radial-gradient(circle at 8% 6%,var(--alma-soft) 0,transparent 38%),radial-gradient(circle at 92% 10%,var(--leen-soft) 0,transparent 36%),radial-gradient(circle at 50% 100%,var(--pink) 0,transparent 45%),radial-gradient(circle at 0% 70%,var(--sky) 0,transparent 35%);
+  background-attachment:fixed}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 28px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:20px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--lav-deep);outline-offset:3px}
+
+/* header */
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px}
+.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+.eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.05;margin:0;text-wrap:balance}
+h1 span{color:var(--lav-deep)}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-size:.88rem;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{border-color:var(--lav)}
+.chip.warn{border-color:var(--bad);color:var(--bad)}
+
+/* scoreboard */
+.board{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
+.score{border-radius:22px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .3s}
+.score.alma{background:var(--alma)}
+.score.leen{background:var(--leen);flex-direction:row-reverse}
+.score .tn{font-family:var(--display);font-weight:800;font-size:clamp(1.1rem,2.4vw,1.6rem);color:#2F2B43}
+.score .pts{font-family:var(--display);font-weight:800;font-size:clamp(2.2rem,5vw,3.4rem);line-height:1;color:#2F2B43;font-variant-numeric:tabular-nums}
+.score.bump{animation:bump .6s}
+@keyframes bump{30%{transform:scale(1.06) rotate(-1deg)}60%{transform:scale(.98)}}
+.score.turn::after{content:"Your turn";position:absolute;top:8px;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#2F2B43;opacity:.75}
+.score.alma.turn::after{right:16px}.score.leen.turn::after{left:16px}
+.progress{background:var(--surface);border-radius:22px;padding:10px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--shadow);min-width:120px}
+.progress b{font-family:var(--display);font-size:1.6rem;font-variant-numeric:tabular-nums}
+.progress small{color:var(--muted);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.bar{width:100%;height:6px;border-radius:9px;background:var(--bg2);margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--lav-deep);border-radius:9px;transition:width .5s}
+
+/* arena */
+.arena{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.team{background:var(--surface);border-radius:28px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:12px;border:2px solid transparent;transition:border-color .3s,opacity .3s;min-width:0}
+.team.alma.active{border-color:var(--alma)} .team.leen.active{border-color:var(--leen)}
+.team.idle{opacity:.62}
+.team h2{font-family:var(--display);font-size:1.35rem;margin:0;font-weight:700}
+.team.alma h2{color:var(--alma-deep)} .team.leen h2{color:var(--leen-deep)}
+.scanner{position:relative;width:100%;max-width:360px;height:270px;perspective:950px;perspective-origin:50% 38%;display:flex;align-items:center;justify-content:center;--cw:90px}
+.glass{position:absolute;left:3%;right:3%;top:4%;bottom:16%;border-radius:999px 999px 26px 26px;border:2px solid color-mix(in srgb,var(--lav) 70%,transparent);
+  background:radial-gradient(ellipse at 50% 20%,color-mix(in srgb,var(--surface) 70%,transparent),transparent 60%),linear-gradient(180deg,color-mix(in srgb,var(--lav) 18%,transparent),transparent 70%);
+  box-shadow:inset 0 0 40px -10px color-mix(in srgb,var(--lav) 60%,transparent)}
+.glass::before{content:"";position:absolute;left:14%;top:8%;width:22%;height:30%;border-radius:50%;border-top:3px solid color-mix(in srgb,var(--surface) 80%,transparent);transform:rotate(-18deg);opacity:.7}
+.floor{position:absolute;bottom:8%;left:8%;right:8%;height:26px;border-radius:50%;background:radial-gradient(ellipse,color-mix(in srgb,var(--lav) 55%,transparent),transparent 70%);filter:blur(2px)}
+.team.alma .floor{background:radial-gradient(ellipse,color-mix(in srgb,var(--alma) 80%,transparent),transparent 70%)}
+.team.leen .floor{background:radial-gradient(ellipse,color-mix(in srgb,var(--leen) 80%,transparent),transparent 70%)}
+.ring{position:absolute;top:50%;left:50%;width:0;height:0;transform-style:preserve-3d;margin-top:-14px}
+.card{position:absolute;width:var(--cw);height:calc(var(--cw)*1.32);left:calc(var(--cw)/-2);top:calc(var(--cw)*-.66);border-radius:16px;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:6px;font-family:var(--display);font-weight:800;font-size:calc(var(--cw)*.17);line-height:1.1;color:#2F2B43;
+  border:2px solid rgba(255,255,255,.75);box-shadow:0 8px 18px -8px rgba(40,30,80,.45);transition:box-shadow .15s}
+.team.alma .card{background:linear-gradient(160deg,var(--alma-soft),var(--alma))}
+.team.leen .card{background:linear-gradient(160deg,var(--leen-soft),var(--leen))}
+:root[data-theme="dark"] .card{color:#2F2B43}
+.card::after{content:"";position:absolute;top:8px;left:50%;width:18px;height:4px;margin-left:-9px;border-radius:4px;background:rgba(47,43,67,.25)}
+.card.front{box-shadow:0 0 0 3px var(--butter),0 0 28px 6px color-mix(in srgb,var(--butter) 70%,transparent)}
+.beam{position:absolute;top:6%;bottom:14%;left:50%;width:calc(var(--cw)*1.25);margin-left:calc(var(--cw)*-.625);border-radius:20px;pointer-events:none;
+  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--butter) 55%,transparent) 30%,color-mix(in srgb,var(--butter) 55%,transparent) 70%,transparent);opacity:0;transition:opacity .3s;mix-blend-mode:screen}
+.scanning .beam{opacity:.85;animation:beam .5s ease-in-out infinite alternate}
+@keyframes beam{to{transform:scaleX(1.25);opacity:.45}}
+.scanline{position:absolute;left:8%;right:8%;height:3px;top:20%;border-radius:3px;background:var(--lav-deep);box-shadow:0 0 14px 3px var(--lav);opacity:0}
+.scanning .scanline{opacity:.9;animation:sweep 1.1s linear infinite}
+@keyframes sweep{0%{top:12%}50%{top:76%}100%{top:12%}}
+.spin{position:relative;margin-top:-6px;border:none;border-radius:999px;padding:12px 34px;font-family:var(--display);font-weight:800;font-size:1.15rem;letter-spacing:.06em;color:#2F2B43;box-shadow:0 8px 20px -8px rgba(0,0,0,.4);transition:transform .15s}
+.team.alma .spin{background:var(--alma)} .team.leen .spin{background:var(--leen)}
+.team.active .spin:not(:disabled){animation:breathe 1.8s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.07);box-shadow:0 0 0 8px color-mix(in srgb,var(--butter) 50%,transparent)}}
+.spin:hover:not(:disabled){transform:scale(1.07)}
+.spin:disabled{cursor:not-allowed;filter:grayscale(.5);opacity:.7}
+
+/* full-screen reveal */
+.reveal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;
+  background:radial-gradient(circle at 50% 50%,var(--rc-soft),var(--bg) 75%)}
+.reveal.alma{--rc:var(--alma);--rc-soft:var(--alma-soft);--rc-deep:var(--alma-deep)} .reveal.leen{--rc:var(--leen);--rc-soft:var(--leen-soft);--rc-deep:var(--leen-deep)}
+.rays{position:absolute;width:220vmax;height:220vmax;left:50%;top:50%;margin:-110vmax 0 0 -110vmax;opacity:.55;
+  background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--rc) 70%,transparent) 0 8deg,transparent 8deg 20deg);animation:rays 14s linear infinite;
+  -webkit-mask:radial-gradient(circle,#000 0,transparent 60%);mask:radial-gradient(circle,#000 0,transparent 60%)}
+@keyframes rays{to{transform:rotate(360deg)}}
+.rcard{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:clamp(26px,5vw,48px) clamp(28px,7vw,80px);border-radius:36px;
+  background:linear-gradient(160deg,var(--rc-soft),var(--rc));color:#2F2B43;border:4px solid rgba(255,255,255,.8);
+  box-shadow:0 0 0 10px color-mix(in srgb,var(--butter) 60%,transparent),0 30px 80px -20px rgba(40,30,80,.55);animation:fly 1.1s cubic-bezier(.2,.9,.25,1.2) both;max-width:calc(100vw - 32px)}
+@keyframes fly{0%{transform:perspective(900px) translateY(40vh) scale(.15) rotateY(720deg) rotateX(30deg);opacity:0}60%{opacity:1}100%{transform:perspective(900px) none}}
+.rcard .lbl{font-size:clamp(.75rem,1.6vw,.95rem);letter-spacing:.3em;text-transform:uppercase;font-weight:700;opacity:.75}
+.rcard .nm{font-family:var(--display);font-weight:800;font-size:clamp(3rem,13vw,8rem);line-height:.95;text-wrap:balance;animation:glow 1.4s ease-in-out .9s infinite alternate}
+@keyframes glow{to{text-shadow:0 0 30px rgba(255,255,255,.9)}}
+.rcard .tm{font-family:var(--display);font-weight:700;font-size:clamp(1.1rem,2.6vw,1.6rem);background:rgba(255,255,255,.55);border-radius:999px;padding:6px 18px}
+.reveal .hint{position:absolute;bottom:max(18px,env(safe-area-inset-bottom,0px));color:var(--muted);font-size:.85rem;letter-spacing:.08em}
+.flash{position:absolute;inset:0;background:#fff;animation:flash .7s ease-out forwards;pointer-events:none}
+@keyframes flash{0%{opacity:.9}100%{opacity:0}}
+.picked{min-height:2.6em;display:flex;flex-direction:column;align-items:center;text-align:center}
+.picked small{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+.picked strong{font-family:var(--display);font-size:1.5rem;line-height:1.15}
+.picked strong.pop{animation:pop .5s}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.left{font-size:.82rem;color:var(--muted)}
+
+/* question stage */
+.stage{background:var(--surface);border-radius:28px;box-shadow:var(--shadow);padding:clamp(18px,3vw,30px);display:flex;flex-direction:column;gap:18px;position:relative;overflow:hidden}
+.stage::before{content:"";position:absolute;inset:0 0 auto 0;height:8px;background:var(--lav)}
+.stage.alma::before{background:var(--alma)} .stage.leen::before{background:var(--leen)}
+.waiting{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:22px 8px;color:var(--muted)}
+.waiting .big{font-family:var(--display);font-size:clamp(1.3rem,3vw,1.8rem);color:var(--ink);font-weight:700;text-wrap:balance}
+.dome{width:84px;height:46px;border-radius:84px 84px 0 0;border:3px solid var(--lav-deep);border-bottom:none;position:relative;margin-bottom:6px;opacity:.8}
+.dome::after{content:"";position:absolute;bottom:0;left:-14px;right:-14px;height:3px;background:var(--lav-deep);border-radius:3px}
+.qhead{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.badge{border-radius:999px;padding:6px 14px;font-weight:700;font-size:.9rem;color:#2F2B43}
+.badge.alma{background:var(--alma)} .badge.leen{background:var(--leen)}
+.qnum{color:var(--muted);font-weight:700;font-size:.9rem}
+.timer{position:relative;width:62px;height:62px;flex:none;border:none;background:none;padding:0}
+.timer svg{width:100%;height:100%;transform:rotate(-90deg)}
+.timer circle{fill:none;stroke-width:6}
+.timer .trk{stroke:var(--bg2)} .timer .run{stroke:var(--lav-deep);stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .3s}
+.timer.low .run{stroke:var(--bad)}
+.timer span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:1.2rem;font-variant-numeric:tabular-nums}
+.timer.paused span{font-size:.7rem;letter-spacing:.08em}
+.question{font-family:var(--display);font-weight:700;font-size:clamp(1.25rem,2.8vw,1.85rem);line-height:1.3;margin:0;text-wrap:balance;max-width:52ch}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:18px;padding:14px 16px;font-size:clamp(1rem,1.8vw,1.12rem);font-weight:700;transition:transform .15s,border-color .2s,background .2s;min-width:0}
+.opt:hover:not(:disabled){transform:translateY(-2px);border-color:var(--lav)}
+.opt .k{flex:none;width:34px;height:34px;border-radius:11px;background:var(--butter);color:#2F2B43;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--good-soft);border-color:var(--good)} .opt.right .k{background:var(--good);color:#fff}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad);animation:shake .45s} .opt.wrong .k{background:var(--bad);color:#fff}
+.opt.dim{opacity:.5}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.result{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border-radius:18px;padding:14px 18px;background:var(--bg2)}
+.result .scan{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.result .verdict{font-family:var(--display);font-weight:800;font-size:1.3rem}
+.result.ok .verdict{color:var(--good)} .result.no .verdict{color:var(--bad)}
+.result p{margin:2px 0 0;color:var(--muted);max-width:68ch;font-size:.95rem}
+.next{border:none;border-radius:999px;padding:12px 22px;font-family:var(--display);font-weight:800;font-size:1.05rem;background:var(--lav-deep);color:var(--surface);box-shadow:var(--shadow)}
+.tbtns{display:flex;gap:10px;flex-wrap:wrap}
+.next.alt{background:var(--butter);color:#2F2B43}
+.next.ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--line);box-shadow:none}
+.next:hover{filter:brightness(1.08)}
+
+footer{text-align:center;color:var(--muted);font-size:.9rem;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:6px}
+footer .lead{font-family:var(--display);font-size:1.15rem;color:var(--ink);font-weight:700}
+footer .lead em{font-style:normal;color:var(--lav-deep)}
+
+/* winner overlay */
+.att{background:var(--surface);border-radius:28px;box-shadow:var(--shadow);padding:clamp(18px,3vw,30px);max-width:760px;width:100%;max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:16px;animation:pop .4s}
+.att h2{font-family:var(--display);font-weight:800;font-size:1.8rem;margin:0}
+.att .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.att h3{font-family:var(--display);margin:0 0 8px;font-size:1.15rem}
+.att .alma h3{color:var(--alma-deep)} .att .leen h3{color:var(--leen-deep)}
+.names{display:flex;flex-wrap:wrap;gap:8px}
+.nm-t{border-radius:999px;padding:8px 14px;font-weight:700;border:2px solid transparent;color:#2F2B43}
+.alma .nm-t{background:var(--alma)} .leen .nm-t{background:var(--leen)}
+.nm-t[aria-pressed="false"]{background:var(--bg2);color:var(--muted);border-color:var(--line);text-decoration:line-through}
+.absent-note{font-size:.8rem;color:var(--bad);font-weight:700}
+@media (max-width:560px){.att .cols{grid-template-columns:1fr}}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:none;border-radius:999px;padding:11px 20px;font-family:var(--display);font-weight:800;font-size:1.02rem;box-shadow:var(--shadow)}
+.btn.go{background:var(--lav-deep);color:var(--surface)} .btn.ghost{background:var(--surface);color:var(--ink);box-shadow:none;border:1.5px solid var(--line)}
+.rbtns{position:absolute;bottom:max(56px,calc(env(safe-area-inset-bottom,0px) + 48px));display:flex;gap:12px;flex-wrap:wrap;justify-content:center;padding:0 16px;animation:pop .5s 1s both}
+.rgo,.rskip{border:none;border-radius:999px;padding:13px 24px;font-family:var(--display);font-weight:800;font-size:1.1rem;box-shadow:var(--shadow)}
+.rgo{background:var(--lav-deep);color:var(--surface)}
+.rskip{background:var(--surface);color:var(--bad);border:2px solid var(--bad)}
+.reveal{cursor:default}
+.overlay{position:fixed;inset:0;z-index:50;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.win{background:var(--surface);border-radius:32px;box-shadow:var(--shadow);padding:clamp(22px,4vw,40px);max-width:620px;width:100%;text-align:center;display:flex;flex-direction:column;gap:14px;animation:pop .7s;max-height:100%;overflow:auto}
+.trophy{font-family:var(--display);font-size:.85rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.win h2{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,3.4rem);line-height:1.05;margin:0;text-wrap:balance}
+.win h2.alma{color:var(--alma-deep)} .win h2.leen{color:var(--leen-deep)} .win h2.tie{color:var(--lav-deep)}
+.finals{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.finals div{border-radius:20px;padding:14px;color:#2F2B43}
+.finals .a{background:var(--alma)} .finals .l{background:var(--leen)}
+.finals b{display:block;font-family:var(--display);font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums}
+.stars{font-size:.95rem;color:var(--muted)} .stars strong{color:var(--ink)}
+.medal{width:96px;height:96px;margin:0 auto;border-radius:50%;background:var(--butter);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -6px 0 rgba(0,0,0,.08);animation:swing 2.4s ease-in-out infinite}
+.medal svg{width:56px;height:56px}
+@keyframes swing{50%{transform:rotate(8deg) scale(1.04)}}
+
+@media (max-width:760px){
+  .arena{grid-template-columns:1fr}
+  .board{grid-template-columns:1fr 1fr}
+  .progress{grid-column:1/-1;grid-row:1;flex-direction:row;gap:12px}
+  .progress .bar{flex:1;margin:0}
+  .opts{grid-template-columns:1fr}
+  .team.idle{opacity:.75}
+}
+.question.focus{animation:focusIn 1.6s cubic-bezier(.2,.8,.2,1) both}
+.opts.focus .opt{animation:focusIn 1.2s cubic-bezier(.2,.8,.2,1) both}
+.opts.focus .opt:nth-child(2){animation-delay:.12s}.opts.focus .opt:nth-child(3){animation-delay:.24s}.opts.focus .opt:nth-child(4){animation-delay:.36s}
+@keyframes focusIn{0%{filter:blur(12px);opacity:.15;transform:scale(1.08)}60%{filter:blur(2px);opacity:.9}100%{filter:none;opacity:1;transform:none}}
+.mascotbox{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.78rem;font-weight:700;color:var(--muted)}
+.mascot{width:155px;height:auto;display:block;overflow:visible}
+.finals .mascot{width:110px;margin:6px auto 0}
+.mascot.happy .whole{animation:bounce .5s ease-in-out infinite alternate}
+.mascot .clapL{animation:clapL .32s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:left bottom}
+.mascot .clapR{animation:clapR .32s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:right bottom}
+.mascot .spark{animation:spark .32s ease-in-out infinite alternate}
+.mascot .clapword{animation:spark .64s ease-in-out infinite alternate}
+.mascot.sad .head{animation:droop 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center bottom}
+.mascot .tear{animation:tear 1.4s ease-in infinite} .mascot .tear.t2{animation-delay:.7s}
+.mascot .drop{animation:tear 1s linear infinite}
+@keyframes bounce{to{transform:translateY(-6px)}}
+@keyframes clapL{from{transform:translateX(-9px) rotate(-10deg)}to{transform:none}}
+@keyframes clapR{from{transform:translateX(9px) rotate(10deg)}to{transform:none}}
+@keyframes spark{from{opacity:0}to{opacity:1}}
+@keyframes droop{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(-8deg) translateY(2px)}}
+@keyframes tear{0%{transform:translateY(0);opacity:1}100%{transform:translateY(16px);opacity:0}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="eyebrow">Grade 7 · Science · Epithelial &amp; Connective Tissues</span>
+      <h1>Tissue <span>Battle</span></h1>
+    </div>
+    <div class="tools">
+      <button class="chip" id="soundBtn" type="button" aria-pressed="true">Sound on</button>
+      <button class="chip" id="themeBtn" type="button">Dark mode</button>
+      <button class="chip" id="finishBtn" type="button">Finish now</button>
+      <button class="chip" id="attBtn" type="button">Attendance</button>
+      <button class="chip" id="resetBtn" type="button">New game</button>
+    </div>
+  </header>
+
+  <section class="board" aria-label="Scoreboard">
+    <div class="score alma" id="scoreAlma"><span class="tn">Team Olivia Rodrigo</span><span class="pts" id="ptsAlma">0</span></div>
+    <div class="progress"><small>Question</small><b id="qCount">0 / 30</b><div class="bar"><i id="qBar" style="width:0%"></i></div></div>
+    <div class="score leen" id="scoreLeen"><span class="tn">Team Billie Eilish</span><span class="pts" id="ptsLeen">0</span></div>
+  </section>
+
+  <section class="arena">
+    <div class="team alma" id="teamAlma">
+      <h2>Team Olivia Rodrigo</h2>
+      <div class="scanner" id="scanAlma" aria-label="Team Olivia Rodrigo dome scanner"><div class="glass"></div><div class="floor"></div><div class="ring"></div><div class="beam"></div><div class="scanline"></div></div><button class="spin" id="spinAlma" type="button">SCAN</button>
+      <div class="picked"><small>Selected student</small><strong id="pickAlma">—</strong></div>
+      <div class="left" id="leftAlma"></div>
+    </div>
+    <div class="team leen" id="teamLeen">
+      <h2>Team Billie Eilish</h2>
+      <div class="scanner" id="scanLeen" aria-label="Team Billie Eilish dome scanner"><div class="glass"></div><div class="floor"></div><div class="ring"></div><div class="beam"></div><div class="scanline"></div></div><button class="spin" id="spinLeen" type="button">SCAN</button>
+      <div class="picked"><small>Selected student</small><strong id="pickLeen">—</strong></div>
+      <div class="left" id="leftLeen"></div>
+    </div>
+  </section>
+
+  <section class="stage" id="stage" aria-live="polite"></section>
+
+  <footer>
+    <span class="lead">Led by <em>Miss Mais</em></span>
+    <span>29 questions · no repeated students until everyone has had a turn</span>
+  </footer>
+</div>
+
+<div class="overlay" id="overlay" hidden></div>
+<div class="reveal" id="reveal" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js"></script>
+<script>
+const TEAMS={
+  alma:{name:"Team Olivia Rodrigo",players:["Alma","Lilian","Lily","Jaydaa","Anaya","Hajra","Louren","Saja","Ghazal","Retal","Hasnaa","Miss Mais"]},
+  leen:{name:"Team Billie Eilish",players:["Leen","Judy","Qamar","Anoud","Naya","Noor","Amna","Aisha","Joury","Talia","Mayar","Jomana","Lama"]}
+};
+const TIME=40;
+
+// [question, correct, wrong1, wrong2, wrong3, evidence]
+const Q=[
+[
+"Which tissue is a single layer of flat, thin cells?",
+"Simple squamous epithelium",
+"Stratified squamous epithelium",
+"Simple columnar epithelium",
+"Dense regular connective tissue",
+"Simple = one layer. Squamous = flat cells.",
+"lungs"
+],
+[
+"Simple squamous epithelium lines which parts of the body?",
+"Blood vessels, heart and lung air sacs",
+"Kidney tubules and gland ducts",
+"Tendons, ligaments and the knee",
+"The outer layer of the skin only",
+"Simple squamous lines blood vessels, the heart, and the air sacs of the lungs.",
+"vessels"
+],
+[
+"Why are the lung air sacs lined with thin, flat squamous cells?",
+"So substances can cross by diffusion",
+"So they can store fat for energy",
+"So they can stretch in every direction",
+"So they can make sweat to cool us",
+"Thin flat cells let oxygen and carbon dioxide diffuse across easily.",
+"lungs"
+],
+[
+"Which epithelium has cube-shaped cells and lines the kidney tubules?",
+"Simple cuboidal epithelium",
+"Simple squamous epithelium",
+"Stratified squamous epithelium",
+"Simple columnar epithelium",
+"Simple cuboidal lines kidney tubules, ducts of some glands and the reproductive tract.",
+"kidney"
+],
+[
+"What are the main jobs of simple cuboidal epithelium?",
+"Absorption, secretion and moving materials",
+"Protection from heat and cold only",
+"Storing fat and keeping us warm",
+"Joining muscles to bones",
+"Simple cuboidal cells absorb, secrete and move materials.",
+"kidney"
+],
+[
+"Tall, column-shaped cells lining parts of the gut are called…",
+"Simple columnar epithelium",
+"Simple squamous epithelium",
+"Stratified cuboidal epithelium",
+"Loose connective tissue",
+"Simple columnar lines some airways and parts of the gut: absorption, secretion, protection.",
+"intestine"
+],
+[
+"Many layers of flat cells stacked on top of each other is called…",
+"Stratified squamous",
+"Simple squamous",
+"Simple cuboidal",
+"Simple columnar",
+"Stratified = many layers. Squamous = flat.",
+"skin"
+],
+[
+"The thin layer that epithelium sits on underneath is the…",
+"Basement membrane",
+"Apical surface",
+"Cell membrane",
+"Lamina propria",
+"Epithelium has a free apical surface on top and sits on a basement membrane.",
+"skin"
+],
+[
+"What is the free, top surface of an epithelial layer called?",
+"The apical surface",
+"The basement membrane",
+"The cytoplasm",
+"The dermis",
+"The apical surface faces the outside or the inside of an organ.",
+"intestine"
+],
+[
+"What is the difference between covering and glandular epithelium?",
+"Glandular makes and releases substances",
+"Covering epithelium makes hormones",
+"Glandular only covers the skin",
+"They are exactly the same tissue",
+"Covering epithelium covers surfaces and lines organs. Glandular epithelium produces and secretes substances.",
+"sweat"
+],
+[
+"An exocrine gland releases its secretion…",
+"Through a duct",
+"Straight into the blood",
+"Into the bone marrow",
+"Without any opening at all",
+"Exocrine glands use a duct, like sweat glands.",
+"sweat"
+],
+[
+"An endocrine gland has no duct. Where do its hormones go?",
+"Straight into the blood",
+"Out through the skin",
+"Into the small intestine",
+"Into the lungs' air sacs",
+"Endocrine glands release hormones directly into the blood.",
+"glands"
+],
+[
+"What is the job of the epidermis, the outer layer of skin?",
+"Protects the body from the outside",
+"Absorbs nutrients from our food",
+"Lets air pass into the lungs",
+"Reduces friction between organs",
+"The epidermis protects the body from the outside environment.",
+"skin"
+],
+[
+"What does the epithelial lining of the intestines do?",
+"Absorbs nutrients from food",
+"Produces sweat to cool the body",
+"Protects us from the sun",
+"Holds the knee joint together",
+"The intestine lining absorbs nutrients from food.",
+"intestine"
+],
+[
+"What does the lining of the abdominal cavity do?",
+"Reduces friction and helps organs move",
+"Absorbs nutrients from our food",
+"Lets air in and out of the lungs",
+"Produces hormones for the blood",
+"The abdominal lining reduces friction and helps organs move.",
+"abdomen"
+],
+[
+"What is the job of your sweat glands?",
+"Produce sweat to help cool the body",
+"Absorb water from the intestines",
+"Carry oxygen around the body",
+"Join bones to other bones",
+"Sweat glands produce sweat to help cool the body.",
+"sweat"
+],
+[
+"What does connective tissue do in the body?",
+"Holds it together, supports and links systems",
+"Only covers the outside of the body",
+"Only makes sweat and hormones",
+"Only carries messages to the brain",
+"Connective tissue connects, supports and links the body systems.",
+"bone"
+],
+[
+"Which is the most abundant tissue in vertebrates?",
+"Loose connective tissue",
+"Dense regular connective tissue",
+"Simple columnar epithelium",
+"Stratified cuboidal epithelium",
+"Loose connective tissue is the most abundant tissue in vertebrates.",
+"abdomen"
+],
+[
+"Loose connective tissue surrounds which structures?",
+"Nerves and blood vessels",
+"Teeth and nails",
+"Hair and fingernails",
+"Only the bones of the skull",
+"It underlies most epithelia and surrounds nerves and blood vessels.",
+"vessels"
+],
+[
+"Which fibres are examples of loose connective tissue?",
+"Collagen and elastin fibres",
+"Muscle and nerve fibres",
+"Hair and nail fibres",
+"Bone and cartilage fibres",
+"Loose connective tissue contains collagen fibres and elastin fibres.",
+"abdomen"
+],
+[
+"Which tissue can withstand stretching in any direction?",
+"Dense connective tissue",
+"Loose connective tissue",
+"Simple squamous epithelium",
+"Simple cuboidal epithelium",
+"Dense connective tissue withstands stretching in any direction.",
+"dermis"
+],
+[
+"The dermis, the deepest layer of skin, is an example of…",
+"Dense irregular connective tissue",
+"Loose connective tissue",
+"Simple columnar epithelium",
+"Fluid connective tissue",
+"The dermis is dense (irregular) connective tissue.",
+"dermis"
+],
+[
+"Tendons and ligaments in the knee are examples of…",
+"Dense regular connective tissue",
+"Loose connective tissue",
+"Stratified squamous epithelium",
+"Fluid connective tissue",
+"Tendons and ligaments are dense regular connective tissue.",
+"knee"
+],
+[
+"The walls of the digestive tract are classified as…",
+"Dense connective tissue",
+"Loose connective tissue",
+"Simple squamous epithelium",
+"Fluid connective tissue",
+"The quick activity: walls of the digestive tract are dense.",
+"intestine"
+],
+[
+"Which of these is NOT a specialized connective tissue?",
+"The epidermis",
+"Adipose (fat) tissue",
+"Cartilage",
+"Blood",
+"Adipose, cartilage, bone and blood are specialized connective tissues. The epidermis is epithelium.",
+"fat"
+],
+[
+"Adipose tissue is the scientific name for…",
+"Fat tissue",
+"Bone tissue",
+"Cartilage",
+"Lymph",
+"Adipose (fat) tissue is a specialized connective tissue.",
+"fat"
+],
+[
+"Blood and lymph are both examples of…",
+"Fluid connective tissues",
+"Simple epithelial tissues",
+"Dense regular tissues",
+"Covering epithelium",
+"Blood and lymph are fluid connective tissues.",
+"vessels"
+],
+[
+"The cartilage and bone in a knee joint are…",
+"Specialized connective tissues",
+"Simple epithelial tissues",
+"Loose connective tissues",
+"Glandular epithelium",
+"Cartilage and bone are specialized connective tissues.",
+"knee"
+],
+[
+"Bone tissue is a type of…",
+"Specialized connective tissue",
+"Covering epithelium",
+"Glandular epithelium",
+"Loose connective tissue",
+"Bone, cartilage, fat and blood are all specialized connective tissues.",
+"bone"
+]
+];
+
+const $=id=>document.getElementById(id);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+let S;
+function present(t){return TEAMS[t].players.filter(n=>!((S&&S.absent)||[]).includes(n))}
+function fresh(){const ab=(S&&S.absent)||[];return{absent:ab,played:{alma:[],leen:[]},scores:{alma:0,leen:0},pools:{alma:shuffle(TEAMS.alma.players.filter(n=>!ab.includes(n))),leen:shuffle(TEAMS.leen.players.filter(n=>!ab.includes(n)))},
+  built:{alma:{},leen:{}},order:shuffle(Q.map((_,i)=>i)),qi:0,turn:"alma",phase:"spin",cur:null,picked:{alma:"—",leen:"—"},stars:{},done:false}}
+function save(){try{localStorage.setItem("bodybattle-v1",JSON.stringify(S))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem("bodybattle-v1"));if(s&&s.order&&s.order.length===Q.length)return s}catch(e){}return null}
+S=load()||fresh();
+S.built=S.built||{alma:{},leen:{}};
+S.absent=S.absent||[];S.played=S.played||{alma:[],leen:[]};
+if(S.phase==="spinning")S.phase="spin";
+
+/* ---------- sound ---------- */
+let AC=null,soundOn=true;
+function tone(f,d=.08,type="triangle",v=.08,delay=0){if(!soundOn)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime+delay,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02)}catch(e){}}
+let NB=null;
+function noise(d,v,f,type="bandpass",delay=0,endF){if(!soundOn)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+  if(!NB){NB=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate);const ch=NB.getChannelData(0);for(let i=0;i<ch.length;i++)ch[i]=Math.random()*2-1}
+  const t=AC.currentTime+delay,src=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain();src.buffer=NB;fl.type=type;fl.frequency.setValueAtTime(f,t);if(endF)fl.frequency.exponentialRampToValueAtTime(endF,t+d);
+  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);src.connect(fl).connect(g).connect(AC.destination);src.start(t);src.stop(t+d+.05)}catch(e){}}
+const sfx={tick:()=>tone(1100,.025,"square",.025),roll:()=>noise(.05,.09,180+Math.random()*60),whoosh:()=>noise(.7,.15,300,"bandpass",0,3000),
+  crash:()=>{noise(1.6,.22,6000,"highpass");noise(.4,.25,90,"lowpass");[523,659,784,1047].forEach((f,i)=>tone(f,.5,"triangle",.07,.05+i*.04))},good:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.18,"triangle",.09,i*.09)),bad:()=>{tone(220,.25,"sawtooth",.05);tone(180,.3,"sawtooth",.05,.15)},land:()=>tone(660,.15,"sine",.1),win:()=>[523,659,784,659,784,1047,1319].forEach((f,i)=>tone(f,.22,"triangle",.1,i*.13))};
+
+/* ---------- dome scanners ---------- */
+const wheels={};
+function makeRing(team){
+  const A=team==="alma"?"Alma":"Leen",box=$("scan"+A),ring=box.querySelector(".ring");
+  const w={team,theta:Math.random()*360,cards:[],r:150,step:30,spinning:false,lastFront:-1};
+  w.build=()=>{
+    const names=S.pools[team].length?S.pools[team]:present(team);
+    ring.innerHTML=names.map(n=>`<div class="card"><span>${esc(n)}</span></div>`).join("");
+    w.cards=[...ring.children];w.lastFront=-1;w.layout();
+  };
+  w.layout=()=>{
+    const bw=box.clientWidth||300,n=w.cards.length,cw=Math.max(62,Math.min(96,bw*.25));
+    w.step=360/n;w.r=n<3?cw*.9:Math.max(cw*.9,cw/(2*Math.tan(Math.PI/n))*1.08);
+    box.style.setProperty("--cw",cw+"px");
+    w.cards.forEach((c,i)=>c.style.transform=`rotateY(${i*w.step}deg) translateZ(${w.r}px)`);
+    w.apply();
+  };
+  w.apply=()=>{
+    ring.style.transform=`translateZ(${-w.r}px) rotateX(-9deg) rotateY(${-w.theta}deg)`;
+    const n=w.cards.length;
+    w.cards.forEach((c,i)=>{const rel=((i*w.step-w.theta)%360+540)%360-180,k=(Math.cos(rel*Math.PI/180)+1)/2;c.style.opacity=(.28+.72*k).toFixed(2);c.style.filter=k<.5?`saturate(${.4+k})`:""});
+    const f=((Math.round(w.theta/w.step))%n+n)%n;
+    if(f!==w.lastFront){w.cards[w.lastFront]?.classList.remove("front");w.cards[f]?.classList.add("front");if(w.spinning)sfx.tick();w.lastFront=f}
+  };
+  w.draw=w.build;
+  w.box=box;
+  return w;
+}
+wheels.alma=makeRing("alma");wheels.leen=makeRing("leen");
+(function idle(){["alma","leen"].forEach(t=>{const w=wheels[t];if(!w.spinning&&!matchMedia("(prefers-reduced-motion: reduce)").matches){w.theta+=S.turn===t&&S.phase==="spin"?.35:.08;w.apply()}});requestAnimationFrame(idle)})();
+
+let rollInt=null;
+function spin(team){
+  if(S.phase!=="spin"||S.turn!==team||S.done)return;
+  if(!present(team).length){openAtt();return}
+  if(!S.pools[team].length){S.pools[team]=shuffle(present(team));S.played[team]=[];wheels[team].build()}
+  S.phase="spinning";renderUI();
+  const w=wheels[team],n=S.pools[team].length,idx=Math.floor(Math.random()*n);
+  let delta=((idx*w.step-w.theta)%360+360)%360;delta+=360*(4+Math.floor(Math.random()*2));
+  const start=w.theta,dur=5200,t0=performance.now(),ease=t=>1-Math.pow(1-t,4);
+  w.spinning=true;w.box.classList.add("scanning");sfx.whoosh();
+  rollInt=setInterval(()=>sfx.roll(),55);
+  (function frame(now){
+    const t=Math.min(1,(now-t0)/dur);w.theta=start+delta*ease(t);w.apply();
+    if(t<1)requestAnimationFrame(frame);
+    else{clearInterval(rollInt);w.spinning=false;w.box.classList.remove("scanning");setTimeout(()=>landed(team,idx),350)}
+  })(t0);
+}
+function showReveal(team,name,done){
+  const R=$("reveal");
+  R.className="reveal "+team;
+  R.innerHTML=`<div class="rays"></div><div class="flash"></div><div class="rcard"><span class="lbl">Scanner identifies</span><span class="nm">${esc(name)}</span><span class="tm">${TEAMS[team].name}</span></div><div class="rbtns"><button class="rgo" type="button">Show the question</button><button class="rskip" type="button">Not here · scan another</button></div><span class="hint">“Not here” marks her absent and scans another girl from the same team</span>`;
+  R.hidden=false;sfx.crash();
+  if(typeof confetti==="function"){const cols=team==="alma"?["#D6C6F4","#F7E8A6","#CDBFF3","#EEE7FC"]:["#B8E3D3","#F7E8A6","#CDBFF3","#E0F4EC"];
+    setTimeout(()=>{confetti({particleCount:90,angle:60,spread:70,origin:{x:0,y:.8},colors:cols,zIndex:70});confetti({particleCount:90,angle:120,spread:70,origin:{x:1,y:.8},colors:cols,zIndex:70})},500);
+    setTimeout(()=>confetti({particleCount:60,spread:360,startVelocity:28,origin:{x:.5,y:.45},colors:cols,shapes:["star"],scalar:1.3,zIndex:70}),950)}
+  let closed=false;const close=()=>{if(closed)return;closed=true;R.hidden=true;R.innerHTML="";done()};
+  R.onclick=null;R.querySelector(".rgo").onclick=close;
+  R.querySelector(".rskip").onclick=()=>{closed=true;R.hidden=true;R.innerHTML="";notHere(team)};
+}
+function landed(team,idx){
+  const name=S.pools[team][idx];
+  S.picked[team]=name;S.pools[team].splice(idx,1);S.played[team].push(name);
+  const qid=S.order[S.qi],q=Q[qid];
+  S.cur={team,player:name,qid,opts:shuffle([q[1],q[2],q[3],q[4]]),chosen:null,left:TIME};
+  S.phase="question";paused=true;save();renderUI();
+  showReveal(team,name,()=>{
+    wheels[team].build();
+    const el=$(team==="alma"?"pickAlma":"pickLeen");el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");
+    startTimer();
+    $("stage").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+  });
+}
+
+/* ---------- timer ---------- */
+let tInt=null,paused=false;
+function startTimer(){stopTimer();paused=false;tInt=setInterval(()=>{if(paused||S.phase!=="question")return;S.cur.left--;updTimer();if(S.cur.left<=0){timeUp()}},1000);updTimer()}
+function timeUp(){stopTimer();S.phase="timeup";sfx.bad();save();renderUI()}
+function addTime(sec){if(S.phase!=="timeup")return;S.cur.left=sec;S.phase="question";save();renderUI();startTimer();tone(880,.15,"sine",.08)}
+function skipNoAnswer(){if(S.phase!=="timeup")return;S.cur.chosen=null;S.phase="answered";next()}
+function stopTimer(){if(tInt)clearInterval(tInt);tInt=null}
+function updTimer(){
+  const t=document.querySelector(".timer");if(!t||!S.cur)return;
+  const C=2*Math.PI*26,frac=Math.max(0,S.cur.left)/TIME;
+  t.querySelector(".run").style.strokeDashoffset=C*(1-frac);
+  t.querySelector("span").textContent=paused?"PAUSED":Math.max(0,S.cur.left);
+  t.classList.toggle("low",S.cur.left<=10);t.classList.toggle("paused",paused);
+  if(S.cur.left<=5&&S.cur.left>0&&!paused)tone(500,.05,"sine",.05);
+}
+
+/* ---------- answering ---------- */
+function answer(opt){
+  if(S.phase!=="question"&&!(S.phase==="timeup"&&opt===null))return;stopTimer();
+  const q=Q[S.cur.qid],team=S.cur.team;S.cur.chosen=opt;
+  const ok=opt===q[1];
+  if(ok){S.scores[team]++;S.built[team][q[6]]=(S.built[team][q[6]]||0)+1;S.stars[S.cur.player]=(S.stars[S.cur.player]||0)+1;sfx.good();burst(team);
+    const sc=$(team==="alma"?"scoreAlma":"scoreLeen");sc.classList.remove("bump");void sc.offsetWidth;sc.classList.add("bump")}
+  else sfx.bad();
+  S.phase="answered";save();renderUI();
+}
+function next(){
+  S.qi++;S.turn=S.turn==="alma"?"leen":"alma";S.cur=null;
+  if(S.qi>=Q.length){finish();return}
+  S.phase="spin";save();renderUI();
+  document.querySelector(".arena").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ---------- confetti ---------- */
+function burst(team){
+  if(typeof confetti!=="function")return;
+  const cols=team==="alma"?["#D6C6F4","#EEE7FC","#F7E8A6","#CDBFF3","#B9A3EA"]:["#B8E3D3","#E0F4EC","#F7E8A6","#CDBFF3","#8FD0B8"];
+  const x=team==="alma"?.25:.75;
+  confetti({particleCount:140,spread:80,startVelocity:45,origin:{x,y:.6},colors:cols,scalar:1.1});
+  setTimeout(()=>confetti({particleCount:80,spread:120,origin:{x:.5,y:.5},colors:cols}),220);
+}
+function celebrate(team){
+  if(typeof confetti!=="function")return;
+  const cols=team==="alma"?["#D6C6F4","#F7E8A6","#CDBFF3","#EEE7FC"]:team==="leen"?["#B8E3D3","#F7E8A6","#CDBFF3","#E0F4EC"]:["#D6C6F4","#B8E3D3","#F7E8A6","#CDBFF3"];
+  const end=Date.now()+5000;
+  (function f(){confetti({particleCount:6,angle:60,spread:60,origin:{x:0,y:.7},colors:cols});confetti({particleCount:6,angle:120,spread:60,origin:{x:1,y:.7},colors:cols});if(Date.now()<end)requestAnimationFrame(f)})();
+  [0,700,1400,2100].forEach(d=>setTimeout(()=>confetti({particleCount:120,spread:360,startVelocity:35,ticks:120,origin:{x:.2+Math.random()*.6,y:.2+Math.random()*.3},colors:cols,shapes:["circle","square","star"]}),d));
+}
+
+/* ---------- finish ---------- */
+function finish(){
+  stopTimer();S.done=true;S.phase="done";save();renderUI();
+  const a=S.scores.alma,l=S.scores.leen,team=a>l?"alma":l>a?"leen":"tie";
+  const head=team==="tie"?"It's a tie!":`${TEAMS[team].name} wins!`;
+  const sub=team==="tie"?"Both bodies are built equally. Perfect teamwork!":`${TEAMS[team].name} built the strongest body!`;
+  const starList=Object.entries(S.stars).sort((x,y)=>y[1]-x[1]).map(([n,c])=>`${esc(n)}${c>1?" ×"+c:""}`);
+  $("overlay").innerHTML=`<div class="win" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div class="medal"><svg viewBox="0 0 24 24" fill="none" stroke="#2F2B43" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg></div>
+    <div class="trophy">Final result · ${S.qi} questions played</div>
+    <h2 id="winTitle" class="${team}">${head}</h2>
+    <p style="margin:0;color:var(--muted)">${sub}</p>
+    <div class="finals"><div class="a">Team Olivia Rodrigo<b>${a}</b>${mascot("alma",a>=l?"happy":"sad")}</div><div class="l">Team Billie Eilish<b>${l}</b>${mascot("leen",l>=a?"happy":"sad")}</div></div>
+    <div class="stars">${starList.length?`<strong>Star scientists:</strong> ${starList.join(", ")}`:"No correct answers yet."}</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="next" id="againBtn" type="button">Play again</button>
+      <button class="chip" id="closeWin" type="button">Back to board</button>
+    </div>
+    <div style="color:var(--muted);font-size:.85rem">Led by Miss Mais</div></div>`;
+  $("overlay").hidden=false;sfx.win();celebrate(team);
+  $("againBtn").onclick=()=>{$("overlay").hidden=true;S=fresh();save();renderUI()};
+  $("closeWin").onclick=()=>{$("overlay").hidden=true};
+}
+
+
+/* ---------- team mascots ---------- */
+function mascot(team,mood){
+  const dress=team==="alma"?"#C9B4F2":"#9FDCC3",bow=team==="alma"?"#7E62C9":"#3E9B7C",happy=mood==="happy";
+  const eyes=happy?`<path d="M66 70 q6 -7 12 0 M92 70 q6 -7 12 0" stroke="#2F2B43" stroke-width="3" fill="none" stroke-linecap="round"/>`
+    :`<circle cx="72" cy="71" r="3.5" fill="#2F2B43"/><circle cx="98" cy="71" r="3.5" fill="#2F2B43"/><path d="M64 62 l12 4 M106 62 l-12 4" stroke="#2F2B43" stroke-width="2.5" stroke-linecap="round"/>
+       <path class="tear" d="M70 78 q-3 6 0 9 q3 -3 0 -9z" fill="#8CC8F0"/><path class="tear t2" d="M100 78 q-3 6 0 9 q3 -3 0 -9z" fill="#8CC8F0"/>`;
+  const mouth=happy?`<path d="M72 86 q13 14 26 0 z" fill="#E86A86" stroke="#2F2B43" stroke-width="2.5" stroke-linejoin="round"/>`
+    :`<path d="M74 94 q11 -9 22 0" stroke="#2F2B43" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  const arms=happy?`<g class="clapL"><path d="M58 128 Q62 112 78 108" stroke="#F3D3BF" stroke-width="10" fill="none" stroke-linecap="round"/><ellipse cx="80" cy="106" rx="7" ry="10" fill="#F3D3BF" stroke="#2F2B43" stroke-width="2"/></g>
+       <g class="clapR"><path d="M112 128 Q108 112 92 108" stroke="#F3D3BF" stroke-width="10" fill="none" stroke-linecap="round"/><ellipse cx="90" cy="106" rx="7" ry="10" fill="#F3D3BF" stroke="#2F2B43" stroke-width="2"/></g>
+       <g class="spark" stroke="${bow}" stroke-width="3" stroke-linecap="round"><path d="M85 88 v-8"/><path d="M72 92 l-6 -6"/><path d="M98 92 l6 -6"/></g>
+       <text class="clapword" x="128" y="70" font-size="15" font-weight="800" fill="${bow}" font-family="Grandstander,Trebuchet MS,sans-serif">clap!</text>`
+    :`<path d="M58 128 Q48 150 52 168" stroke="#F3D3BF" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M112 128 Q122 150 118 168" stroke="#F3D3BF" stroke-width="10" fill="none" stroke-linecap="round"/>
+       <g class="cloud"><ellipse cx="85" cy="12" rx="22" ry="9" fill="#C9C3DA"/><ellipse cx="72" cy="10" rx="11" ry="9" fill="#C9C3DA"/><ellipse cx="98" cy="9" rx="12" ry="10" fill="#C9C3DA"/>
+       <path class="drop" d="M76 24 v6 M86 26 v6 M96 24 v6" stroke="#8CC8F0" stroke-width="2.5" stroke-linecap="round"/></g>`;
+  return `<svg class="mascot ${happy?"happy":"sad"}" viewBox="0 0 170 190" role="img" aria-label="${TEAMS[team].name} mascot ${happy?"clapping":"looking sad"}">
+    <g class="whole">
+    <path d="M50 180 Q52 128 85 120 Q118 128 120 180 Z" fill="${dress}" stroke="#2F2B43" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M45 74 Q40 30 85 28 Q130 30 125 74 L128 118 Q112 104 112 80 L58 80 Q58 104 42 118 Z" fill="#4A3B52"/>
+    <g class="head"><circle cx="85" cy="74" r="30" fill="#F3D3BF" stroke="#2F2B43" stroke-width="2.5"/>
+    <path d="M55 70 Q58 42 85 42 Q112 42 115 70 Q100 54 85 56 Q70 54 55 70Z" fill="#4A3B52"/>
+    <path d="M100 40 l14 -10 l2 16 z M100 40 l-12 -12 l-2 16 z" fill="${bow}" stroke="#2F2B43" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="66" cy="84" r="5" fill="#F4A7B9" opacity=".7"/><circle cx="104" cy="84" r="5" fill="#F4A7B9" opacity=".7"/>
+    ${eyes}${mouth}</g>${arms}</g></svg>`;
+}
+/* ---------- render ---------- */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function renderUI(){
+  $("ptsAlma").textContent=S.scores.alma;$("ptsLeen").textContent=S.scores.leen;
+  const played=Math.min(Q.length,S.qi+(S.phase==="question"||S.phase==="answered"||S.phase==="timeup"?1:0));
+  $("qCount").textContent=`${played} / ${Q.length}`;$("qBar").style.width=(played/Q.length*100)+"%";
+  ["alma","leen"].forEach(t=>{
+    const A=t==="alma"?"Alma":"Leen",active=S.turn===t&&!S.done;
+    $("team"+A).classList.toggle("active",active);$("team"+A).classList.toggle("idle",!active);
+    $("score"+A).classList.toggle("turn",active&&S.phase==="spin");
+    $("spin"+A).disabled=!(active&&S.phase==="spin");
+    $("pick"+A).textContent=S.picked[t];
+    const left=S.pools[t].length,ab=S.absent.filter(x=>TEAMS[t].players.includes(x)).length;$("left"+A).textContent=(left?`${left} of ${present(t).length} students still to scan`:"Everyone has played. The scanner refills on next scan")+(ab?` · ${ab} absent`:"");
+  });
+  const st=$("stage");st.className="stage"+(S.cur?" "+S.cur.team:"");
+  if(S.done){st.innerHTML=`<div class="waiting"><div class="dome"></div><div class="big">Game over. Final scores: Alma ${S.scores.alma} · Leen ${S.scores.leen}</div><button class="next" id="showWin" type="button">Show the celebration</button></div>`;$("showWin").onclick=finish;return}
+  if(!S.cur){
+    const tn=TEAMS[S.turn].name;
+    st.innerHTML=`<div class="waiting"><div class="dome"></div><div class="big">${S.phase==="spinning"?"The scanner is searching…":`${tn}, press SCAN!`}</div><span>A student is chosen at random, then a science question appears here.</span></div>`;return}
+  const q=Q[S.cur.qid],C=2*Math.PI*26,L="ABCD";
+  let h=`<div class="qhead"><div class="who"><span class="badge ${S.cur.team}">${esc(S.cur.player)} · ${TEAMS[S.cur.team].name}</span><span class="qnum">Question ${S.qi+1} of ${Q.length}</span></div>
+    <button class="timer" id="timerBtn" type="button" title="Click to pause or resume" aria-label="Timer, click to pause"><svg viewBox="0 0 62 62"><circle class="trk" cx="31" cy="31" r="26"/><circle class="run" cx="31" cy="31" r="26" stroke-dasharray="${C}" stroke-dashoffset="0"/></svg><span>${S.cur.left}</span></button></div>
+    <h3 class="question${S.phase==="question"?" focus":""}">${esc(q[0])}</h3><div class="opts${S.phase==="question"?" focus":""}">`;
+  S.cur.opts.forEach((o,i)=>{
+    let cls="opt";
+    if(S.phase==="answered"){if(o===q[1])cls+=" right";else if(o===S.cur.chosen)cls+=" wrong";else cls+=" dim"}
+    h+=`<button class="${cls}" type="button" data-i="${i}" ${S.phase==="answered"||S.phase==="timeup"?"disabled":""}><span class="k">${L[i]}</span><span>${esc(o)}</span></button>`;
+  });
+  h+=`</div>`;
+  if(S.phase==="timeup"){
+    h+=`<div class="result no"><div style="min-width:0;flex:1 1 280px"><div class="scan">Teacher decides</div>
+      <div class="verdict">Time's up, ${esc(S.cur.player)}!</div>
+      <p>The answer is still hidden. Give her more time, show the answer, or move on.</p></div>
+      <div class="tbtns"><button class="next" id="more10" type="button">+10 seconds</button><button class="next alt" id="showAns" type="button">Show the answer</button><button class="next ghost" id="skipAns" type="button">Next, keep it hidden</button></div></div>`;
+  }
+  if(S.phase==="answered"){
+    const ok=S.cur.chosen===q[1],timeout=S.cur.chosen===null;
+    const last=S.qi+1>=Q.length,nt=TEAMS[S.turn==="alma"?"leen":"alma"].name;
+    h+=`<div class="result ${ok?"ok":"no"}"><div class="mascotbox">${mascot(S.cur.team,ok?"happy":"sad")}<span>${TEAMS[S.cur.team].name}</span></div><div style="min-width:0;flex:1 1 300px"><div class="scan">Result</div>
+      <div class="verdict">${ok?`Correct! +1 for ${TEAMS[S.cur.team].name}`:timeout?"Time's up! No point this round":"Not quite. No point this time"}</div>
+      <p>${esc(q[5])}</p></div>
+      <button class="next" id="nextBtn" type="button">${last?"See the winner":`Next: ${nt} scans`}</button></div>`;
+  }
+  st.innerHTML=h;
+  st.querySelectorAll(".opt").forEach(b=>b.onclick=()=>answer(S.cur.opts[+b.dataset.i]));
+  if($("nextBtn"))$("nextBtn").onclick=next;
+  if($("more10")){$("more10").onclick=()=>addTime(10);$("showAns").onclick=()=>answer(null);$("skipAns").onclick=skipNoAnswer}
+  $("timerBtn").onclick=()=>{if(S.phase!=="question")return;paused=!paused;updTimer()};
+  updTimer();
+}
+
+/* ---------- controls ---------- */
+function openAtt(){
+  const O=$("overlay");
+  const col=t=>`<div class="${t}"><h3>${TEAMS[t].name} · <span id="cnt-${t}">${present(t).length}</span> here</h3><div class="names">${TEAMS[t].players.map(n=>`<button class="nm-t" type="button" data-n="${esc(n)}" data-t="${t}" aria-pressed="${!S.absent.includes(n)}">${esc(n)}</button>`).join("")}</div></div>`;
+  O.innerHTML=`<div class="att" role="dialog" aria-modal="true" aria-labelledby="attTitle"><div><div class="eyebrow">Before you scan</div><h2 id="attTitle">Who's here today?</h2><p style="margin:4px 0 0;color:var(--muted)">Tap a name to mark her absent. Absent students are taken off the scanner until you tap them back.</p></div><div class="cols">${col("alma")}${col("leen")}</div><div class="absent-note" id="attWarn"></div><div class="row"><button class="btn go" id="attDone" type="button">Save attendance</button><button class="btn ghost" id="attAll" type="button">Everyone is here</button></div></div>`;
+  O.hidden=false;
+  const warn=()=>{$("attWarn").textContent=["alma","leen"].filter(t=>!present(t).length).map(t=>TEAMS[t].name+" needs at least one student present.").join(" ")};
+  const apply=(n,t,here)=>{
+    if(here){S.absent=S.absent.filter(x=>x!==n);if(!S.pools[t].includes(n)&&!S.played[t].includes(n))S.pools[t].push(n)}
+    else{if(!S.absent.includes(n))S.absent.push(n);S.pools[t]=S.pools[t].filter(x=>x!==n)}
+  };
+  O.querySelectorAll(".nm-t").forEach(b=>b.onclick=()=>{const here=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",here);apply(b.dataset.n,b.dataset.t,here);$("cnt-"+b.dataset.t).textContent=present(b.dataset.t).length;warn()});
+  $("attAll").onclick=()=>{O.querySelectorAll(".nm-t").forEach(b=>{b.setAttribute("aria-pressed","true");apply(b.dataset.n,b.dataset.t,true)});["alma","leen"].forEach(t=>$("cnt-"+t).textContent=present(t).length);warn()};
+  $("attDone").onclick=()=>{if(!present("alma").length||!present("leen").length){warn();return}O.hidden=true;save();wheels.alma.build();wheels.leen.build();renderUI()};
+  warn();
+}
+$("attBtn").onclick=()=>{if(S.phase==="spinning")return;openAtt()};
+function notHere(team){
+  const old=S.picked[team];
+  if(!S.absent.includes(old))S.absent.push(old);
+  S.played[team]=S.played[team].filter(x=>x!==old);S.pools[team]=S.pools[team].filter(x=>x!==old);
+  S.cur=null;S.phase="spin";S.picked[team]="—";stopTimer();save();
+  wheels[team].build();renderUI();
+  document.querySelector(".arena").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+  if(!present(team).length){openAtt();return}
+  setTimeout(()=>spin(team),500);
+}
+$("spinAlma").onclick=()=>spin("alma");$("spinLeen").onclick=()=>spin("leen");
+$("soundBtn").onclick=e=>{soundOn=!soundOn;e.currentTarget.textContent=soundOn?"Sound on":"Sound off";e.currentTarget.setAttribute("aria-pressed",soundOn)};
+function curDark(){const t=document.documentElement.dataset.theme;return t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches}
+function setThemeLabel(){$("themeBtn").textContent=curDark()?"Light mode":"Dark mode"}
+$("themeBtn").onclick=()=>{document.documentElement.dataset.theme=curDark()?"light":"dark";try{localStorage.setItem("bodybattle-theme",document.documentElement.dataset.theme)}catch(e){};setThemeLabel()};
+try{const t=localStorage.getItem("bodybattle-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+setThemeLabel();
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",setThemeLabel);
+let resetArm=null;
+$("resetBtn").onclick=e=>{const b=e.currentTarget;
+  if(resetArm){clearTimeout(resetArm);resetArm=null;b.classList.remove("warn");b.textContent="New game";stopTimer();S=fresh();save();$("overlay").hidden=true;renderUI();wheels.alma.draw();wheels.leen.draw();return}
+  b.classList.add("warn");b.textContent="Click again to reset";resetArm=setTimeout(()=>{resetArm=null;b.classList.remove("warn");b.textContent="New game"},3000)};
+let finArm=null;
+$("finishBtn").onclick=e=>{const b=e.currentTarget;if(S.done){finish();return}
+  if(finArm){clearTimeout(finArm);finArm=null;b.classList.remove("warn");b.textContent="Finish now";if(S.phase==="answered"||S.phase==="timeup")S.qi++;finish();return}
+  b.classList.add("warn");b.textContent="Click again to end";finArm=setTimeout(()=>{finArm=null;b.classList.remove("warn");b.textContent="Finish now"},3000)};
+document.addEventListener("keydown",e=>{
+  if(!$("reveal").hidden||!$("overlay").hidden)return;
+  if(S.phase==="question"&&/^[a-dA-D1-4]$/.test(e.key)){const i="abcd1234".indexOf(e.key.toLowerCase())%4;answer(S.cur.opts[i])}
+  else if(S.phase==="answered"&&(e.key==="Enter"||e.key===" ")&&document.activeElement.tagName!=="BUTTON"){e.preventDefault();next()}
+});
+window.addEventListener("resize",()=>{wheels.alma.layout();wheels.leen.layout()});
+
+
+renderUI();wheels.alma.draw();wheels.leen.draw();
+if(S.phase==="question")startTimer();
+</script>
+
+</body></html>
